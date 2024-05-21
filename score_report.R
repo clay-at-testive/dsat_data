@@ -69,6 +69,20 @@ rw_high = rw_ceiling(rw_mod_1_correct)
 math_low = math_floor(math_mod_1_correct)
 math_high = math_ceiling(math_mod_1_correct)
 
+rw_bucket_range = data.frame(x = c('', '', ''),
+                             position =
+                               c('bottom', 'range', 'top'),
+                             value = c(rw_low,
+                                       (rw_high - rw_low),
+                                       (800 - rw_high)))
+
+math_bucket_range = data.frame(x = c('', '', ''),
+                             position =
+                               c('bottom', 'range', 'top'),
+                             value = c(math_low,
+                                       (math_high - math_low),
+                                       (800 - math_high)))
+
 rw_subsection = test %>%
   filter(section == 'ReadAndWrite') %>%
   group_by(name) %>%
@@ -125,3 +139,17 @@ rw_subsection_graph = ggplot(rw_subsection) +
 math_subsection_graph = ggplot(math_subsection) +
   geom_col(aes(name, PercentCorrect), fill = '#076fa2', width = 0.6) +
   coord_flip()
+
+rw_score_range = ggplot(rw_bucket_range, aes(fill = position, y = value,
+                                             x = x)) +
+  geom_bar(position = position_stack(reverse = TRUE), stat = 'identity',
+           width = 0.2) +
+  scale_fill_manual(values = c('gray', '#b9770e', 'gray')) +
+  coord_cartesian(ylim = c(200, 800))
+
+math_score_range = ggplot(math_bucket_range, aes(fill = position, y = value,
+                                             x = x)) +
+  geom_bar(position = position_stack(reverse = TRUE), stat = 'identity',
+           width = 0.2) +
+  scale_fill_manual(values = c('gray', '#076fa2', 'gray')) +
+  coord_cartesian(ylim = c(200, 800))
