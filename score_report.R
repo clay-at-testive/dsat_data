@@ -3,7 +3,7 @@ source('~/Testive/db_testive/basic_tools.R')
 rw_floor = function(integer) {
   if (integer == 0) {
     floor = 200
-  } else if (integer > 15) {          #HighScoring
+  } else if (integer > 15) {    #HighScoring
     floor = 10 * round(17.5774 + integer * 1.4229)
   } else                       #LowScoring
     floor = 10 * round(27.7817 + integer * 0.6419)
@@ -35,12 +35,12 @@ math_ceiling = function(integer) {
     ceiling = 800
   } else if (integer > 11) {          #HighScoring 
     ceiling = 10 *  round(29.312 + integer * 1.1438 + 22 * 1.1865)
-  } else                        #LowScoring
+  } else                              #LowScoring
     ceiling = 10 * round(22.2509 + integer * 0.7549 + 22 * 0.9324)
   return(ceiling)
 }
 
-test = read.csv('~/Desktop/sample_test.csv') %>%
+test = read.csv('~/Desktop/sample_test_3.csv') %>%
   mutate(isCorrect = case_when(isCorrect == 'true' ~ '1',
                                TRUE ~ '0'))
 test$isCorrect = as.numeric(test$isCorrect)
@@ -64,15 +64,64 @@ math_mod_2 = test %>%
 rw_bucket = rw_mod_1$scoringCategory[1]
 math_bucket = math_mod_1$scoringCategory[1]
 
-subsection_questions = test %>%
-  group_by(name) %>%
-  summarize(n = n())
+rw_low = rw_floor(rw_mod_1_correct)
+rw_high = rw_ceiling(rw_mod_1_correct)
+math_low = math_floor(math_mod_1_correct)
+math_high = math_ceiling(math_mod_1_correct)
 
-subsection_scores = test %>%
+rw_subsection = test %>%
+  filter(section == 'ReadAndWrite') %>%
   group_by(name) %>%
-  summarize(isCorrect = sum(isCorrect))
+  summarize(Correct = sum(isCorrect), Total = n()) %>%
+  mutate(PercentCorrect = percent(Correct/Total))
 
-subsection_scores = full_join(subsection_scores, subsection_questions) %>%
-  mutate(Incorrect = n - isCorrect) %>%
-  rename(Correct = isCorrect) %>%
-  select(-n)
+math_subsection = test %>%
+  filter(section == 'Math') %>%
+  group_by(name) %>%
+  summarize(Correct = sum(isCorrect), Total = n()) %>%
+  mutate(PercentCorrect = percent(Correct/Total))
+
+## Create graphics ##
+
+rw_score = section_scores %>%
+  filter(section == 'ReadAndWrite')
+rw_score_data = data.frame(category = c('score', 'max_score'),
+                             value = c(rw_score$score, 800))
+rw_score_data$ymax = rw_score_data$value/800
+rw_score_data$ymin = c(0, head(rw_score_data$ymax, n = -1))
+
+rw_circle = ggplot(rw_score_data,
+                     aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3,
+                     fill = category)) +
+  geom_rect() + coord_polar(theta = 'y') +
+  xlim(c(2, 4)) +
+  theme_void() +
+  scale_fill_manual(values = c('grey', 'green4')) +
+  annotate('text', x = 2, y = 0, label = rw_score$score, size = 30) +
+  theme(legend.position = 'none')
+
+
+math_score = section_scores %>%
+  filter(section == 'Math')
+math_score_data = data.frame(category = c('score', 'max_score'),
+                             value = c(math_score$score, 800))
+math_score_data$ymax = math_score_data$value/800
+math_score_data$ymin = c(0, head(math_score_data$ymax, n = -1))
+
+math_circle = ggplot(math_score_data,
+                     aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3,
+                     fill = category)) +
+  geom_rect() + coord_polar(theta = 'y') +
+  xlim(c(2, 4)) +
+  theme_void() +
+  scale_fill_manual(values = c('grey', 'green4')) +
+  annotate('text', x = 2, y = 0, label = math_score$score, size = 30) +
+  theme(legend.position = 'none')
+
+rw_subsection_graph = ggplot(rw_subsection) +
+  geom_col(aes(name, PercentCorrect), fill = '#b9770e', width = 0.6) +
+  coord_flip()
+
+math_subsection_graph = ggplot(math_subsection) +
+  geom_col(aes(name, PercentCorrect), fill = '#076fa2', width = 0.6) +
+  coord_flip()
