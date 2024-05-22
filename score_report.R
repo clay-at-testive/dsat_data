@@ -69,19 +69,19 @@ rw_high = rw_ceiling(rw_mod_1_correct)
 math_low = math_floor(math_mod_1_correct)
 math_high = math_ceiling(math_mod_1_correct)
 
-rw_bucket_range = data.frame(x = c('', '', ''),
-                             position =
+rw_bucket_range = data.frame(position =
                                c('bottom', 'range', 'top'),
                              value = c(rw_low,
                                        (rw_high - rw_low),
-                                       (800 - rw_high)))
+                                       (800 - rw_high)),
+                             x = c(0.5, 0.5, 0.5))
 
-math_bucket_range = data.frame(x = c('', '', ''),
-                             position =
+math_bucket_range = data.frame(position =
                                c('bottom', 'range', 'top'),
                              value = c(math_low,
                                        (math_high - math_low),
-                                       (800 - math_high)))
+                                       (800 - math_high)),
+                             x = c(0.5, 0.5, 0.5))
 
 rw_subsection = test %>%
   filter(section == 'ReadAndWrite') %>%
@@ -114,7 +114,6 @@ rw_circle = ggplot(rw_score_data,
   annotate('text', x = 2, y = 0, label = rw_score$score, size = 30) +
   theme(legend.position = 'none')
 
-
 math_score = section_scores %>%
   filter(section == 'Math')
 math_score_data = data.frame(category = c('score', 'max_score'),
@@ -140,16 +139,38 @@ math_subsection_graph = ggplot(math_subsection) +
   geom_col(aes(name, PercentCorrect), fill = '#076fa2', width = 0.6) +
   coord_flip()
 
+rw_line_data <- data.frame(
+    x = 0.45, 
+    xend = 0.55, 
+    y = rw_score$score,
+    yend = rw_score$score
+)
+
+math_line_data <- data.frame(
+    x = 0.45, 
+    xend = 0.55, 
+    y = math_score$score,
+    yend = math_score$score
+)
+
 rw_score_range = ggplot(rw_bucket_range, aes(fill = position, y = value,
-                                             x = x)) +
+                                                    x = x)) +
   geom_bar(position = position_stack(reverse = TRUE), stat = 'identity',
-           width = 0.2) +
+           width = 0.1) +
   scale_fill_manual(values = c('gray', '#b9770e', 'gray')) +
-  coord_cartesian(ylim = c(200, 800))
+  geom_segment(data = rw_line_data, aes(x =  x, xend = xend, y = y,
+                                        yend = yend),
+                   color = "black", linewidth = 1, inherit.aes = FALSE) +
+  coord_cartesian(ylim = c(200, 800)) +
+  scale_x_continuous(limits = c(0, 1))
 
 math_score_range = ggplot(math_bucket_range, aes(fill = position, y = value,
                                              x = x)) +
   geom_bar(position = position_stack(reverse = TRUE), stat = 'identity',
-           width = 0.2) +
+           width = 0.1) +
   scale_fill_manual(values = c('gray', '#076fa2', 'gray')) +
-  coord_cartesian(ylim = c(200, 800))
+  geom_segment(data = math_line_data, aes(x = x, xend = xend, y = y,
+                                          yend = yend),
+               color = 'black', linewidth = 1, inherit.aes = FALSE) +
+  coord_cartesian(ylim = c(200, 800)) +
+  scale_x_continuous(limits = c(0, 1))
