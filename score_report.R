@@ -1,4 +1,5 @@
 source('~/Testive/db_testive/basic_tools.R')
+library(glue)
 
 rw_floor = function(integer) {
   if (integer == 0) {
@@ -40,7 +41,7 @@ math_ceiling = function(integer) {
   return(ceiling)
 }
 
-test = read.csv('~/Desktop/sample_test_3.csv') %>%
+test = read.csv('~/Desktop/sample_test_4.csv') %>%
   mutate(isCorrect = case_when(isCorrect == 'true' ~ '1',
                                TRUE ~ '0'))
 test$isCorrect = as.numeric(test$isCorrect)
@@ -162,7 +163,13 @@ rw_score_range = ggplot(rw_bucket_range, aes(fill = position, y = value,
                                         yend = yend),
                    color = "black", linewidth = 1, inherit.aes = FALSE) +
   coord_cartesian(ylim = c(200, 800)) +
-  scale_x_continuous(limits = c(0, 1))
+  scale_x_continuous(limits = c(0, 1)) +
+  theme_void() +
+  theme(legend.position = 'none') +
+  annotate('text', x = 0.32, y = (rw_high - 30), size = 5,
+           label = glue('Your range: {rw_low}-{rw_high}')) +
+  annotate('text', x = 0.76, y = rw_score$score, size = 5,
+           label = glue('Your final Reading/Writing score: {rw_score$score}'))
 
 math_score_range = ggplot(math_bucket_range, aes(fill = position, y = value,
                                              x = x)) +
@@ -173,4 +180,10 @@ math_score_range = ggplot(math_bucket_range, aes(fill = position, y = value,
                                           yend = yend),
                color = 'black', linewidth = 1, inherit.aes = FALSE) +
   coord_cartesian(ylim = c(200, 800)) +
-  scale_x_continuous(limits = c(0, 1))
+  scale_x_continuous(limits = c(0, 1)) +
+  theme_void() +
+  theme(legend.position = 'none') +
+  annotate('text', x = 0.32, y = (math_high - 30), size = 5,
+           label = glue('Your range: {math_low}-{math_high}')) +
+  annotate('text', x = 0.7, y = math_score$score, size = 5,
+           label = glue('Your final Math score: {math_score$score}'))
