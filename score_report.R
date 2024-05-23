@@ -41,7 +41,7 @@ math_ceiling = function(integer) {
   return(ceiling)
 }
 
-test = read.csv('~/Desktop/sample_test_4.csv') %>%
+test = read.csv('~/Desktop/sample_test_3.csv') %>%
   mutate(isCorrect = case_when(isCorrect == 'true' ~ '1',
                                TRUE ~ '0'))
 test$isCorrect = as.numeric(test$isCorrect)
@@ -111,8 +111,8 @@ rw_circle = ggplot(rw_score_data,
   geom_rect() + coord_polar(theta = 'y') +
   xlim(c(2, 4)) +
   theme_void() +
-  scale_fill_manual(values = c('grey', 'green4')) +
-  annotate('text', x = 2, y = 0, label = rw_score$score, size = 30) +
+  scale_fill_manual(values = c('grey', '#b9770e')) +
+  annotate('text', x = 2, y = 0, label = rw_score$score, size = 25) +
   theme(legend.position = 'none')
 
 math_score = section_scores %>%
@@ -128,8 +128,25 @@ math_circle = ggplot(math_score_data,
   geom_rect() + coord_polar(theta = 'y') +
   xlim(c(2, 4)) +
   theme_void() +
+  scale_fill_manual(values = c('grey', '#076fa2')) +
+  annotate('text', x = 2, y = 0, label = math_score$score, size = 25) +
+  theme(legend.position = 'none')
+
+composite_score = data.frame(section = 'Composite',
+                             score = sum(section_scores$score))
+composite_score_data = data.frame(category = c('score', 'max_score'),
+                             value = c(composite_score$score, 1600))
+composite_score_data$ymax = composite_score_data$value/1600
+composite_score_data$ymin = c(0, head(composite_score_data$ymax, n = -1))
+
+composite_circle = ggplot(composite_score_data,
+                     aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3,
+                     fill = category)) +
+  geom_rect() + coord_polar(theta = 'y') +
+  xlim(c(2, 4)) +
+  theme_void() +
   scale_fill_manual(values = c('grey', 'green4')) +
-  annotate('text', x = 2, y = 0, label = math_score$score, size = 30) +
+  annotate('text', x = 2, y = 0, label = composite_score$score, size = 25) +
   theme(legend.position = 'none')
 
 rw_subsection_graph = ggplot(rw_subsection) +
