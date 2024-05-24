@@ -41,10 +41,15 @@ math_ceiling = function(integer) {
   return(ceiling)
 }
 
-test = read.csv('~/Desktop/sample_test_3.csv') %>%
+question_info = read.csv('~/Desktop/question_info.csv') %>%
+  rename(questionId = id, tag = name)
+
+test = read.csv('~/Desktop/sample_test_2.csv') %>%
   mutate(isCorrect = case_when(isCorrect == 'true' ~ '1',
                                TRUE ~ '0'))
 test$isCorrect = as.numeric(test$isCorrect)
+
+test = left_join(test, question_info, by = 'questionId')
 
 section_scores = test %>%
   filter(nonEmpty(score)) %>%
@@ -204,3 +209,13 @@ math_score_range = ggplot(math_bucket_range, aes(fill = position, y = value,
            label = glue('Your range: {math_low}-{math_high}')) +
   annotate('text', x = 0.7, y = math_score$score, size = 5,
            label = glue('Your final Math score: {math_score$score}'))
+
+# Need to create correct_color and tag_color columns
+# Probably need to hack geom_bar into geom_rect to get correct width of bar
+
+ggplot(mod1, aes(y = order, fill = tag_color)) +
+  geom_bar(position = 'identity', width = 1)
++ scale_y_reverse() + coord_cartesian(xlim = c(0.25, 0.75)) + scale_x_discrete()
+
+# Create matix for math section showing technique questions and
+# correct/incorrect. See geom_tile
